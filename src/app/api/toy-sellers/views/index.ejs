@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zava Corporation - Premium Sportswear</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 20px;
+        }
+        h1 {
+            color: #667eea;
+            font-size: 3em;
+            margin-bottom: 10px;
+        }
+        .tagline {
+            color: #666;
+            font-size: 1.2em;
+        }
+        .section {
+            margin: 30px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+        .section h2 {
+            color: #764ba2;
+            margin-bottom: 15px;
+        }
+        input, button {
+            padding: 12px;
+            margin: 5px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 1em;
+        }
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background: #764ba2;
+        }
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .product-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            border: 2px solid #667eea;
+            text-align: center;
+        }
+        .product-card h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+        .price {
+            font-size: 1.5em;
+            color: #764ba2;
+            font-weight: bold;
+        }
+        #results {
+            margin-top: 15px;
+            padding: 15px;
+            background: white;
+            border-radius: 5px;
+            min-height: 50px;
+        }
+        .warning {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            color: #856404;
+        }
+        .warning strong {
+            display: block;
+            font-size: 1.2em;
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>⚡ ZAVA CORPORATION</h1>
+            <p class="tagline">Premium Sportswear & Athletic Gear</p>
+        </header>
+
+        <div class="warning">
+            <strong>⚠️ DEMO ENVIRONMENT</strong>
+            This application contains intentional security vulnerabilities for demonstration purposes only.
+            DO NOT use in production!
+        </div>
+
+        <!-- Login Section -->
+        <div class="section">
+            <h2>🔐 Customer Login</h2>
+            <form id="loginForm">
+                <input type="text" id="username" name="username" placeholder="Username" required>
+                <input type="password" id="password" name="password" placeholder="Password" required>
+                <button type="submit">Login</button>
+            </form>
+            <div id="loginResult"></div>
+            <p style="margin-top: 10px; color: #666; font-size: 0.9em;">
+                Try: admin/admin123 or john/password
+            </p>
+        </div>
+
+        <!-- Product Search -->
+        <div class="section">
+            <h2>🔍 Search Products</h2>
+            <input type="text" id="searchInput" placeholder="Search for sportswear...">
+            <button onclick="searchProducts()">Search</button>
+            <div id="searchResults"></div>
+        </div>
+
+        <!-- Featured Products -->
+        <div class="section">
+            <h2>🏃 Featured Products</h2>
+            <div class="product-grid">
+                <div class="product-card">
+                    <h3>Running Shoes Pro</h3>
+                    <p>Professional running shoes with advanced cushioning</p>
+                    <p class="price">$129.99</p>
+                </div>
+                <div class="product-card">
+                    <h3>Athletic Shorts</h3>
+                    <p>Breathable sports shorts for maximum comfort</p>
+                    <p class="price">$39.99</p>
+                </div>
+                <div class="product-card">
+                    <h3>Training T-Shirt</h3>
+                    <p>Moisture-wicking performance shirt</p>
+                    <p class="price">$29.99</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- User Profile Access -->
+        <div class="section">
+            <h2>👤 User Profile</h2>
+            <input type="number" id="userId" placeholder="User ID">
+            <button onclick="loadUserProfile()">Load Profile</button>
+            <div id="userProfile"></div>
+        </div>
+
+        <!-- File Export -->
+        <div class="section">
+            <h2>📁 Export Data</h2>
+            <input type="text" id="exportFilename" placeholder="export.txt">
+            <button onclick="exportData()">Export</button>
+            <div id="exportResult"></div>
+        </div>
+
+        <!-- URL Fetcher -->
+        <div class="section">
+            <h2>🌐 Fetch External Data</h2>
+            <input type="text" id="fetchUrl" placeholder="https://api.example.com/data" style="width: 60%;">
+            <button onclick="fetchExternalUrl()">Fetch</button>
+            <div id="fetchResult"></div>
+        </div>
+    </div>
+
+    <script>
+        // VULNERABILITY: XSS through innerHTML (CWE-79)
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            const response = await fetch('/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password })
+            });
+
+            const data = await response.json();
+            
+            // VULNERABILITY: Displaying unsanitized user input
+            if (data.success) {
+                document.getElementById('loginResult').innerHTML = 
+                    `<p style="color: green;">Welcome, ${data.user.username}! Role: ${data.user.role}</p>`;
+            } else {
+                document.getElementById('loginResult').innerHTML = 
+                    `<p style="color: red;">${data.message}</p>`;
+            }
+        });
+
+        // VULNERABILITY: XSS in search results (CWE-79)
+        async function searchProducts() {
+            const searchTerm = document.getElementById('searchInput').value;
+            
+            const response = await fetch(`/search?q=${searchTerm}`);
+            const products = await response.json();
+            
+            let html = '<div style="margin-top: 15px;">';
+            if (products.length > 0) {
+                products.forEach(product => {
+                    // VULNERABILITY: Unsanitized output
+                    html += `
+                        <div style="padding: 10px; margin: 5px; background: white; border-radius: 5px;">
+                            <strong>${product.name}</strong><br>
+                            ${product.description}<br>
+                            <span style="color: #764ba2; font-weight: bold;">$${product.price}</span>
+                        </div>
+                    `;
+                });
+            } else {
+                html += '<p>No products found for: ' + searchTerm + '</p>';
+            }
+            html += '</div>';
+            
+            document.getElementById('searchResults').innerHTML = html;
+        }
+
+        // VULNERABILITY: Exposing sensitive user data
+        async function loadUserProfile() {
+            const userId = document.getElementById('userId').value;
+            
+            const response = await fetch(`/user/${userId}`);
+            const user = await response.json();
+            
+            if (user) {
+                // VULNERABILITY: Displaying sensitive information including credit card
+                document.getElementById('userProfile').innerHTML = `
+                    <div style="margin-top: 15px; background: white; padding: 15px; border-radius: 5px;">
+                        <p><strong>Username:</strong> ${user.username}</p>
+                        <p><strong>Email:</strong> ${user.email}</p>
+                        <p><strong>Role:</strong> ${user.role}</p>
+                        <p><strong>Credit Card:</strong> ${user.credit_card}</p>
+                    </div>
+                `;
+            }
+        }
+
+        // VULNERABILITY: Command injection through filename
+        async function exportData() {
+            const filename = document.getElementById('exportFilename').value;
+            
+            const response = await fetch('/export', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ filename })
+            });
+            
+            const text = await response.text();
+            document.getElementById('exportResult').innerHTML = 
+                `<p style="margin-top: 10px;">${text}</p>`;
+        }
+
+        // VULNERABILITY: SSRF vulnerability
+        async function fetchExternalUrl() {
+            const url = document.getElementById('fetchUrl').value;
+            
+            const response = await fetch(`/fetch-url?url=${encodeURIComponent(url)}`);
+            const data = await response.text();
+            
+            document.getElementById('fetchResult').innerHTML = 
+                `<div style="margin-top: 15px; background: white; padding: 10px; border-radius: 5px; max-height: 200px; overflow: auto;">
+                    <pre>${data}</pre>
+                </div>`;
+        }
+
+        // VULNERABILITY: Storing sensitive data in localStorage
+        function saveCredentials() {
+            localStorage.setItem('username', document.getElementById('username').value);
+            localStorage.setItem('password', document.getElementById('password').value);
+        }
+
+        // VULNERABILITY: Using eval for dynamic content
+        function processUserInput(input) {
+            eval(input); // Dangerous!
+        }
+    </script>
+</body>
+</html>

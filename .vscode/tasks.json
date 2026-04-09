@@ -1,0 +1,17 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Tailspin: Prepare app",
+      "type": "shell",
+      "command": "if (-not (Test-Path .env)) { Copy-Item .env.example .env }; npx prisma migrate deploy",
+      "problemMatcher": []
+    },
+    {
+      "label": "Tailspin: First-time setup",
+      "type": "shell",
+      "command": "npm install; if (-not (Test-Path .env)) { Copy-Item .env.example .env }; npx prisma migrate reset --force",
+      "problemMatcher": []
+    }
+  ]
+}

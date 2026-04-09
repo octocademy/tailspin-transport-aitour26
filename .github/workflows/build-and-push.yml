@@ -1,0 +1,62 @@
+name: Build and Push to ACR
+
+on:
+  # push:
+  #   branches:
+  #     - main
+  workflow_dispatch:
+
+env:
+  ACR_ENDPOINT: ${{ vars.ACR_ENDPOINT }}
+  IMAGE_NAME: tailspin-toys
+  IMAGE_VERSION: v1.0.0-${{ github.run_number }}
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+      attestations: write
+      artifact-metadata: write      
+      packages: write
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Log in to Azure Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.ACR_ENDPOINT }}
+          username: ${{ secrets.REGISTRY_USERNAME }}
+          password: ${{ secrets.REGISTRY_PASSWORD }}
+      
+      - name: Build and push Docker image
+        id: push
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: |
+            ${{ env.ACR_ENDPOINT }}/${{ env.IMAGE_NAME }}:latest
+            ${{ env.ACR_ENDPOINT }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+      
+      - name: Generate artifact attestation
+        uses: actions/attest-build-provenance@v3
+        with:
+          subject-name: ${{ env.ACR_ENDPOINT }}/${{ env.IMAGE_NAME }}
+          subject-digest: ${{ steps.push.outputs.digest }}
+          push-to-registry: true
+      
+      - name: Image digest
+        run: echo "Image pushed successfully to ${{ env.ACR_ENDPOINT }}/${{ env.IMAGE_NAME }}"
+
+      - name: Create artifact metadata storage record
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          jq -n --arg artifactName "${{ env.IMAGE_NAME }}" --arg artifactVersion "${{ env.IMAGE_VERSION }}" --arg artifactDigest "${{ steps.push.outputs.digest }}" '{"name": $artifactName, "digest": $artifactDigest, "version": $artifactVersion, "registry_url": "https://azurecr.io", "repository": "tailspin-toys"}' > create-record.json
+
+          gh api -X POST orgs/${{ github.repository_owner }}/artifacts/metadata/storage-record --input create-record.json
+        shell: bash
