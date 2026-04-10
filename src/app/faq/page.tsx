@@ -2,6 +2,7 @@ import { Metadata } from "next";
 import { Zap } from "lucide-react";
 import { MaxWidthWrapper } from "@/components/shared/max-width-wrapper";
 import { FaqSection } from "@/components/faq/faq-section";
+import { AskQuestionForm } from "@/components/faq/ask-question-form";
 
 export const metadata: Metadata = {
   title: "FAQ | Tailspin Transport",
@@ -31,6 +32,13 @@ export default function FaqPage() {
               ⚡ ⚡ ⚡
             </div>
           </div>
+        </MaxWidthWrapper>
+      </section>
+
+      {/* Ask question form */}
+      <section className="py-12 bg-muted/30">
+        <MaxWidthWrapper className="max-w-4xl">
+          <AskQuestionForm />
         </MaxWidthWrapper>
       </section>
 
