@@ -16,14 +16,6 @@ interface VehiclesSearchContentProps {
 export function VehiclesSearchContent({ vehicles }: VehiclesSearchContentProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-  const [priceRange, setPriceRange] = useState<[number, number]>([0, 0]);
-  const [priceInitialized, setPriceInitialized] = useState(false);
-
-  /* Derive unique categories from the vehicle data, sorted alphabetically */
-  const categories = useMemo(() => {
-    const unique = [...new Set(vehicles.map((v) => v.category))];
-    return unique.sort();
-  }, [vehicles]);
 
   /* Derive min and max prices from the data */
   const { minPrice, maxPrice } = useMemo(() => {
@@ -32,11 +24,18 @@ export function VehiclesSearchContent({ vehicles }: VehiclesSearchContentProps) 
     return { minPrice: Math.min(...prices), maxPrice: Math.max(...prices) };
   }, [vehicles]);
 
-  /* Initialize price range from the data on first render */
-  if (!priceInitialized && vehicles.length > 0) {
-    setPriceRange([minPrice, maxPrice]);
-    setPriceInitialized(true);
-  }
+  /* Initialize price range from vehicle data — lazy initializer runs once on mount */
+  const [priceRange, setPriceRange] = useState<[number, number]>(() => {
+    if (vehicles.length === 0) return [0, 0];
+    const prices = vehicles.map((v) => v.price);
+    return [Math.min(...prices), Math.max(...prices)];
+  });
+
+  /* Derive unique categories from the vehicle data, sorted alphabetically */
+  const categories = useMemo(() => {
+    const unique = [...new Set(vehicles.map((v) => v.category))];
+    return unique.sort();
+  }, [vehicles]);
 
   /* Toggle a category in/out of the selected list */
   const handleCategoryChange = (category: string) => {

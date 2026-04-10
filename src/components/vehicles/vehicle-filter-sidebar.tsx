@@ -13,6 +13,9 @@ const usdFormatter = new Intl.NumberFormat('en-US', {
   maximumFractionDigits: 0,
 });
 
+/* Price slider step size — $1,000 increments stored in cents */
+const PRICE_STEP_CENTS = 100000;
+
 interface VehicleFilterSidebarProps {
   /** All unique categories available for filtering */
   categories: string[];
@@ -94,7 +97,7 @@ export function VehicleFilterSidebar({
           <Slider
             min={minPrice}
             max={maxPrice}
-            step={100000}
+            step={PRICE_STEP_CENTS}
             value={priceRange}
             onValueChange={(val) => onPriceRangeChange(val as [number, number])}
           />
