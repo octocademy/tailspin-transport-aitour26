@@ -1,6 +1,6 @@
 import { prisma } from '@/lib/prisma';
-import { VehicleCard } from '@/components/vehicles/vehicle-card';
 import { MaxWidthWrapper } from '@/components/shared/max-width-wrapper';
+import { VehiclesSearchContent } from '@/components/vehicles/vehicles-search-content';
 import { Zap } from 'lucide-react';
 
 export const metadata = {
@@ -9,6 +9,7 @@ export const metadata = {
 };
 
 export default async function VehiclesPage() {
+  /* Fetch all vehicles server-side; pass to the client search/filter component */
   const vehicles = await prisma.vehicle.findMany({
     orderBy: { createdAt: 'desc' },
   });
@@ -26,25 +27,16 @@ export default async function VehiclesPage() {
               All Vehicles
             </h1>
             <p className="text-muted-foreground max-w-xl">
-              Explore our full range of electric vehicles. From the efficient Ion to the 
+              Explore our full range of electric vehicles. From the efficient Ion to the
               breathtaking Apex supercar — there&apos;s an EV for every journey.
             </p>
           </div>
-          
+
           {/* Divider */}
           <div className="sparkle-divider">⚡ ⚡ ⚡</div>
-          
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-7">
-            {vehicles.map((vehicle) => (
-              <VehicleCard key={vehicle.id} vehicle={vehicle} hideFeaturedTag={true} />
-            ))}
-          </div>
-          
-          {vehicles.length === 0 && (
-            <div className="text-center py-16 glass-card rounded-xl">
-              <p className="text-muted-foreground">No vehicles found in the lineup yet.</p>
-            </div>
-          )}
+
+          {/* Search bar + sidebar filters + vehicle grid */}
+          <VehiclesSearchContent vehicles={vehicles} />
         </div>
       </MaxWidthWrapper>
     </div>
