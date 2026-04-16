@@ -39,17 +39,17 @@ function matchesVehicleText(vehicle: Vehicle, query: string): boolean {
 export function VehiclesSearchContent({ vehicles }: VehiclesSearchContentProps) {
   const [query, setQuery] = useState('');
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-  const [minUsdPrice, setMinUsdPrice] = useState('');
-  const [maxUsdPrice, setMaxUsdPrice] = useState('');
+  const [minUsdPriceInput, setMinUsdPriceInput] = useState('');
+  const [maxUsdPriceInput, setMaxUsdPriceInput] = useState('');
 
-  const categories = useMemo(
-    () => Array.from(new Set(vehicles.map((vehicle) => vehicle.category))).sort((a, b) => a.localeCompare(b)),
-    [vehicles]
-  );
+  const categories = useMemo(() => {
+    const uniqueCategories = Array.from(new Set(vehicles.map((vehicle) => vehicle.category)));
+    return uniqueCategories.sort((a, b) => a.localeCompare(b));
+  }, [vehicles]);
 
   const filteredVehicles = useMemo(() => {
-    const minPriceInCents = parseUsdToCents(minUsdPrice);
-    const maxPriceInCents = parseUsdToCents(maxUsdPrice);
+    const minPriceInCents = parseUsdToCents(minUsdPriceInput);
+    const maxPriceInCents = parseUsdToCents(maxUsdPriceInput);
 
     return vehicles.filter((vehicle) => {
       const matchesText = matchesVehicleText(vehicle, query);
@@ -59,12 +59,12 @@ export function VehiclesSearchContent({ vehicles }: VehiclesSearchContentProps) 
 
       return matchesText && matchesCategory && matchesMinPrice && matchesMaxPrice;
     });
-  }, [maxUsdPrice, minUsdPrice, query, selectedCategories, vehicles]);
+  }, [maxUsdPriceInput, minUsdPriceInput, query, selectedCategories, vehicles]);
 
   function toggleCategory(category: string) {
     setSelectedCategories((currentSelectedCategories) =>
       currentSelectedCategories.includes(category)
-        ? currentSelectedCategories.filter((selectedCategory) => selectedCategory !== category)
+        ? currentSelectedCategories.filter((cat) => cat !== category)
         : [...currentSelectedCategories, category]
     );
   }
@@ -72,8 +72,8 @@ export function VehiclesSearchContent({ vehicles }: VehiclesSearchContentProps) 
   function clearFilters() {
     setQuery('');
     setSelectedCategories([]);
-    setMinUsdPrice('');
-    setMaxUsdPrice('');
+    setMinUsdPriceInput('');
+    setMaxUsdPriceInput('');
   }
 
   return (
@@ -122,8 +122,8 @@ export function VehiclesSearchContent({ vehicles }: VehiclesSearchContentProps) 
               type="number"
               min="0"
               step="1000"
-              value={minUsdPrice}
-              onChange={(event) => setMinUsdPrice(event.target.value)}
+              value={minUsdPriceInput}
+              onChange={(event) => setMinUsdPriceInput(event.target.value)}
               placeholder="Min"
               aria-label="Minimum price in USD"
             />
@@ -131,8 +131,8 @@ export function VehiclesSearchContent({ vehicles }: VehiclesSearchContentProps) 
               type="number"
               min="0"
               step="1000"
-              value={maxUsdPrice}
-              onChange={(event) => setMaxUsdPrice(event.target.value)}
+              value={maxUsdPriceInput}
+              onChange={(event) => setMaxUsdPriceInput(event.target.value)}
               placeholder="Max"
               aria-label="Maximum price in USD"
             />
