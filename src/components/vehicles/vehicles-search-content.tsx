@@ -29,7 +29,10 @@ function matchesVehicleText(vehicle: Vehicle, query: string): boolean {
     return true;
   }
 
-  const searchIndex = [vehicle.name, vehicle.category, vehicle.shortTagline, vehicle.range].join(' ').toLowerCase();
+  const searchIndex = [vehicle.name, vehicle.category, vehicle.shortTagline, vehicle.range]
+    .filter((value): value is string => Boolean(value))
+    .join(' ')
+    .toLowerCase();
   return searchIndex.includes(query.toLowerCase().trim());
 }
 
@@ -91,7 +94,7 @@ export function VehiclesSearchContent({ vehicles }: VehiclesSearchContentProps) 
           </div>
           <p className="text-xs text-muted-foreground flex items-center gap-1.5">
             <Sparkles className="h-3.5 w-3.5 text-primary" />
-            Semantic search fallback: local instant search
+            Instant local search
           </p>
         </div>
 
