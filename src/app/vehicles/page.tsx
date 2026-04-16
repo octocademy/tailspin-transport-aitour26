@@ -22,6 +22,7 @@ export default async function VehiclesPage({ searchParams }: VehiclesPageProps) 
   const resolvedSearchParams = await searchParams;
   const selectedRange = resolvedSearchParams?.range?.trim() ?? '';
   const selectedType = resolvedSearchParams?.type?.trim() ?? '';
+  const hasActiveFilters = Boolean(selectedRange || selectedType);
 
   const categories = await prisma.vehicle.findMany({
     select: { category: true },
@@ -107,7 +108,9 @@ export default async function VehiclesPage({ searchParams }: VehiclesPageProps) 
           {vehicles.length === 0 && (
             <div className="text-center py-16 glass-card rounded-xl">
               <p className="text-muted-foreground">
-                No vehicles matched your range and type filters.
+                {hasActiveFilters
+                  ? 'No vehicles matched your range and type filters.'
+                  : 'No vehicles found in the lineup yet.'}
               </p>
             </div>
           )}
