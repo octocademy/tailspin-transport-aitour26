@@ -24,7 +24,7 @@ export default async function VehiclesPage({ searchParams }: VehiclesPageProps) 
   const selectedType = resolvedSearchParams?.type?.trim() ?? '';
   const hasActiveFilters = Boolean(selectedRange || selectedType);
 
-  const categories = await prisma.vehicle.findMany({
+  const categoryOptions = await prisma.vehicle.findMany({
     select: { category: true },
     distinct: ['category'],
     orderBy: { category: 'asc' },
@@ -82,7 +82,7 @@ export default async function VehiclesPage({ searchParams }: VehiclesPageProps) 
                 className="h-9 w-full rounded-md border border-input bg-transparent px-3 text-sm shadow-xs outline-none transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
               >
                 <option value="">All types</option>
-                {categories.map(({ category }) => (
+                {categoryOptions.map(({ category }) => (
                   <option key={category} value={category}>
                     {category}
                   </option>
