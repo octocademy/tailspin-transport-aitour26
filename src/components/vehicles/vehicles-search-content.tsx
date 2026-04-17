@@ -32,7 +32,9 @@ export function VehiclesSearchContent({ vehicles }: VehiclesSearchContentProps) 
 
   const filteredVehicles = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
-    const minimumRangeValue = minimumRange === '' ? null : Number.parseInt(minimumRange, 10);
+    const parsedMinimumRange = minimumRange === '' ? Number.NaN : Number.parseInt(minimumRange, 10);
+    const minimumRangeValue =
+      Number.isNaN(parsedMinimumRange) || parsedMinimumRange < 0 ? null : parsedMinimumRange;
 
     return vehicles.filter((vehicle) => {
       const isTypeMatch = selectedType === 'all' || vehicle.category === selectedType;
