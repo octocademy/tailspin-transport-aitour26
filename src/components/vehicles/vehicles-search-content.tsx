@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import type { Vehicle } from '@prisma/client';
 import { Search, SlidersHorizontal } from 'lucide-react';
 import { VehicleCard } from '@/components/vehicles/vehicle-card';
@@ -10,6 +10,8 @@ import { Button } from '@/components/ui/button';
 interface VehiclesSearchContentProps {
   vehicles: Vehicle[];
 }
+
+const MINOR_UNITS_TO_DOLLARS_DIVISOR = 100;
 
 function parseOptionalNumber(value: string): number | null {
   if (!value.trim()) {
@@ -38,21 +40,36 @@ export function VehiclesSearchContent({ vehicles }: VehiclesSearchContentProps) 
     [vehicles],
   );
 
+  const searchableVehicles = useMemo(
+    () =>
+      vehicles.map((vehicle) => ({
+        vehicle,
+        searchableText: [vehicle.name, vehicle.category, vehicle.shortTagline, vehicle.range]
+          .join(' ')
+          .toLowerCase(),
+      })),
+    [vehicles],
+  );
+
   const filteredVehicles = useMemo(() => {
-    const normalizedSearchTerm = searchTerm.trim().toLowerCase();
+    const normalizedSearchTokens = searchTerm
+      .trim()
+      .toLowerCase()
+      .split(/\s+/)
+      .filter(Boolean);
     const minPriceValue = parseOptionalNumber(minPrice);
     const maxPriceValue = parseOptionalNumber(maxPrice);
     const minRangeValue = parseOptionalNumber(minRange);
     const maxRangeValue = parseOptionalNumber(maxRange);
 
-    return vehicles.filter((vehicle) => {
-      const vehiclePriceUsd = vehicle.price / 100;
+    return searchableVehicles
+      .filter(({ vehicle, searchableText }) => {
+      const vehiclePriceUsd = vehicle.price / MINOR_UNITS_TO_DOLLARS_DIVISOR;
       const vehicleRangeKm = parseRangeKm(vehicle.range);
-      const searchableText = [vehicle.name, vehicle.category, vehicle.shortTagline, vehicle.range]
-        .join(' ')
-        .toLowerCase();
 
-      const matchesSearch = !normalizedSearchTerm || searchableText.includes(normalizedSearchTerm);
+      const matchesSearch =
+        normalizedSearchTokens.length === 0 ||
+        normalizedSearchTokens.every((token) => searchableText.includes(token));
       const matchesCategory =
         selectedCategories.length === 0 || selectedCategories.includes(vehicle.category);
       const matchesMinPrice = minPriceValue === null || vehiclePriceUsd >= minPriceValue;
@@ -70,25 +87,26 @@ export function VehiclesSearchContent({ vehicles }: VehiclesSearchContentProps) 
         matchesMinRange &&
         matchesMaxRange
       );
-    });
-  }, [maxPrice, maxRange, minPrice, minRange, searchTerm, selectedCategories, vehicles]);
+      })
+      .map(({ vehicle }) => vehicle);
+  }, [maxPrice, maxRange, minPrice, minRange, searchTerm, searchableVehicles, selectedCategories]);
 
-  function toggleCategory(category: string) {
+  const toggleCategory = useCallback((category: string) => {
     setSelectedCategories((previous) =>
       previous.includes(category)
         ? previous.filter((existingCategory) => existingCategory !== category)
         : [...previous, category],
     );
-  }
+  }, []);
 
-  function clearFilters() {
+  const clearFilters = useCallback(() => {
     setSearchTerm('');
     setSelectedCategories([]);
     setMinPrice('');
     setMaxPrice('');
     setMinRange('');
     setMaxRange('');
-  }
+  }, []);
 
   return (
     <section className="grid grid-cols-[290px_1fr] gap-8">
@@ -96,7 +114,7 @@ export function VehiclesSearchContent({ vehicles }: VehiclesSearchContentProps) 
         <div className="space-y-1">
           <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.15em] text-primary">
             <SlidersHorizontal className="h-3.5 w-3.5" />
-            Search &amp; Filters
+            Search & Filters
           </p>
           <p className="text-sm text-muted-foreground">Use text, type, price, and range to narrow the lineup.</p>
         </div>
@@ -127,7 +145,7 @@ export function VehiclesSearchContent({ vehicles }: VehiclesSearchContentProps) 
                     type="checkbox"
                     checked={selectedCategories.includes(category)}
                     onChange={() => toggleCategory(category)}
-                    className="h-4 w-4 rounded border-border text-primary focus-visible:ring-2 focus-visible:ring-ring"
+                    className="h-4 w-4 cursor-pointer rounded border-border text-primary focus-visible:ring-2 focus-visible:ring-ring"
                   />
                   <span>{category}</span>
                 </label>
@@ -196,7 +214,7 @@ export function VehiclesSearchContent({ vehicles }: VehiclesSearchContentProps) 
         ) : (
           <div className="rounded-xl border border-border/50 bg-card/60 py-16 text-center shadow-cloud">
             <p className="text-muted-foreground">
-              No vehicles match these filters yet. Try widening the search range.
+              No vehicles match these filters yet. Try broadening your search criteria.
             </p>
           </div>
         )}
