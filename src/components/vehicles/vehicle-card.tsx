@@ -5,8 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ShoppingBag, Battery } from 'lucide-react';
 
-/* Reusable USD currency formatter — created once, shared across all card instances */
-const usdFormatter = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
+/* Reusable GBP currency formatter — created once, shared across all card instances */
+const gbpFormatter = new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP' });
 
 interface VehicleCardProps {
   vehicle: Vehicle;
@@ -45,7 +45,7 @@ export function VehicleCard({ vehicle, hideFeaturedTag = false }: VehicleCardPro
             </p>
           </div>
           <span className="font-bold text-primary text-lg whitespace-nowrap">
-            {usdFormatter.format(vehicle.price / 100)}
+            {gbpFormatter.format(vehicle.price / 100)}
           </span>
         </div>
       </CardHeader>
