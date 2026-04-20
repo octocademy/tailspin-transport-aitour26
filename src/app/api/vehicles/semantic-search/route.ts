@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { buildVehicleSearchableText } from "@/lib/vehicle-search";
 
 interface AzureSemanticResult {
   id?: string;
@@ -25,7 +26,7 @@ export async function GET(request: NextRequest) {
 
   const localRankedIds = vehicles
     .filter((vehicle) => {
-      const searchableText = `${vehicle.name} ${vehicle.shortTagline} ${vehicle.category} ${vehicle.range}`.toLowerCase();
+      const searchableText = buildVehicleSearchableText(vehicle);
       return searchableText.includes(query.toLowerCase());
     })
     .map((vehicle) => vehicle.id);

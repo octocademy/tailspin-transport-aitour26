@@ -6,6 +6,7 @@ import { Search, SlidersHorizontal } from "lucide-react";
 import { VehicleCard } from "@/components/vehicles/vehicle-card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { buildVehicleSearchableText } from "@/lib/vehicle-search";
 
 interface VehiclesSearchContentProps {
   vehicles: Vehicle[];
@@ -32,7 +33,7 @@ export function VehiclesSearchContent({ vehicles }: VehiclesSearchContentProps) 
   const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const categories = useMemo(
-    () => Array.from(new Set(vehicles.map((vehicle) => vehicle.category))).sort((left, right) => left.localeCompare(right)),
+    () => Array.from(new Set(vehicles.map((vehicle) => vehicle.category))).sort((a, b) => a.localeCompare(b)),
     [vehicles],
   );
 
@@ -43,14 +44,14 @@ export function VehiclesSearchContent({ vehicles }: VehiclesSearchContentProps) 
     const parsedMaxPrice = maxPrice === "" ? null : Number(maxPrice);
 
     const locallyFilteredVehicles = vehicles.filter((vehicle) => {
-      const searchableText = `${vehicle.name} ${vehicle.category} ${vehicle.shortTagline} ${vehicle.range}`.toLowerCase();
+      const searchableText = buildVehicleSearchableText(vehicle);
       const matchesText = normalizedSearch.length === 0 || searchableText.includes(normalizedSearch);
       const matchesRange = normalizedRange.length === 0 || vehicle.range.toLowerCase().includes(normalizedRange);
       const matchesCategory = selectedCategories.size === 0 || selectedCategories.has(vehicle.category);
 
-      const priceInPounds = vehicle.price / 100;
-      const matchesMinPrice = parsedMinPrice === null || priceInPounds >= parsedMinPrice;
-      const matchesMaxPrice = parsedMaxPrice === null || priceInPounds <= parsedMaxPrice;
+      const priceInGBP = vehicle.price / 100;
+      const matchesMinPrice = parsedMinPrice === null || priceInGBP >= parsedMinPrice;
+      const matchesMaxPrice = parsedMaxPrice === null || priceInGBP <= parsedMaxPrice;
 
       return matchesText && matchesRange && matchesCategory && matchesMinPrice && matchesMaxPrice;
     });
@@ -61,12 +62,12 @@ export function VehiclesSearchContent({ vehicles }: VehiclesSearchContentProps) 
 
     // Semantic search returns ranked IDs, while local filters decide the final inclusion set.
     const semanticRanking = new Map(semanticOrderedIds.map((vehicleId, index) => [vehicleId, index]));
-    return [...locallyFilteredVehicles].sort((left, right) => {
-      const leftScore = semanticRanking.get(left.id) ?? Number.POSITIVE_INFINITY;
-      const rightScore = semanticRanking.get(right.id) ?? Number.POSITIVE_INFINITY;
+    return [...locallyFilteredVehicles].sort((a, b) => {
+      const leftScore = semanticRanking.get(a.id) ?? Number.POSITIVE_INFINITY;
+      const rightScore = semanticRanking.get(b.id) ?? Number.POSITIVE_INFINITY;
 
       if (leftScore === rightScore) {
-        return left.name.localeCompare(right.name);
+        return a.name.localeCompare(b.name);
       }
 
       return leftScore - rightScore;
@@ -127,8 +128,8 @@ export function VehiclesSearchContent({ vehicles }: VehiclesSearchContentProps) 
   }
 
   function toggleCategory(category: string) {
-    setSelectedCategories((previous) => {
-      const updated = new Set(previous);
+    setSelectedCategories((prevCategories) => {
+      const updated = new Set(prevCategories);
       if (updated.has(category)) {
         updated.delete(category);
       } else {
@@ -167,9 +168,9 @@ export function VehiclesSearchContent({ vehicles }: VehiclesSearchContentProps) 
     <div className="grid gap-8 lg:grid-cols-[280px_minmax(0,1fr)]">
       <aside className="h-fit space-y-6 rounded-xl border border-border/50 bg-card p-5 shadow-sm">
         <div className="space-y-2">
-          <p className="flex items-center gap-2 text-xs font-medium tracking-[0.14em] text-primary uppercase">
+          <p className="flex items-center gap-2 text-xs font-medium tracking-[0.14em] text-primary">
             <SlidersHorizontal className="h-3.5 w-3.5" />
-            Search &amp; Filters
+            Search & Filters
           </p>
           <p className="text-sm text-muted-foreground">
             Search by name, type, tagline, or range. Then narrow by category and price.
@@ -186,7 +187,7 @@ export function VehiclesSearchContent({ vehicles }: VehiclesSearchContentProps) 
               id="vehicle-search"
               value={searchQuery}
               onChange={(event) => handleSearchQueryChange(event.target.value)}
-              placeholder="Try Apex, SUV, family, or 652 km"
+              placeholder="Try sedan, crossover, family, or 500 km"
               className="pl-9"
             />
           </div>
@@ -208,12 +209,17 @@ export function VehiclesSearchContent({ vehicles }: VehiclesSearchContentProps) 
           <p className="text-sm font-medium text-foreground">Vehicle type</p>
           <div className="space-y-2">
             {categories.map((category) => (
-              <label key={category} className="flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 hover:bg-muted/40">
+              <label
+                key={category}
+                htmlFor={`vehicle-type-${category.toLowerCase()}`}
+                className="flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 hover:bg-muted/40"
+              >
                 <input
+                  id={`vehicle-type-${category.toLowerCase()}`}
                   type="checkbox"
                   checked={selectedCategories.has(category)}
                   onChange={() => toggleCategory(category)}
-                  className="h-4 w-4 rounded border-border text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+                  className="h-4 w-4 accent-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
                 />
                 <span className="text-sm text-foreground">{category}</span>
               </label>
