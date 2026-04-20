@@ -137,9 +137,9 @@ export default async function VehiclesPage({ searchParams }: VehiclesPageProps) 
 
   if (query && azureResultIds.length > 0) {
     const positionById = new Map(azureResultIds.map((id, index) => [id, index]));
-    filteredVehicles.sort((first, second) => {
-      const firstRank = positionById.get(first.id) ?? Number.POSITIVE_INFINITY;
-      const secondRank = positionById.get(second.id) ?? Number.POSITIVE_INFINITY;
+    filteredVehicles.sort((vehicleA, vehicleB) => {
+      const firstRank = positionById.get(vehicleA.id) ?? Number.POSITIVE_INFINITY;
+      const secondRank = positionById.get(vehicleB.id) ?? Number.POSITIVE_INFINITY;
       return firstRank - secondRank;
     });
   }
@@ -193,11 +193,27 @@ export default async function VehiclesPage({ searchParams }: VehiclesPageProps) 
                 <h2 className="text-sm font-semibold uppercase tracking-wider text-foreground">Price (GBP)</h2>
                 <div className="grid gap-2">
                   <label htmlFor="minPrice" className="text-xs font-medium text-muted-foreground">Min (£)</label>
-                  <Input id="minPrice" name="minPrice" type="number" min="0" step="0.01" defaultValue={filters.minPrice ?? ''} />
+                  <Input
+                    id="minPrice"
+                    name="minPrice"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    defaultValue={filters.minPrice ?? ''}
+                    aria-label="Minimum price in GBP"
+                  />
                 </div>
                 <div className="grid gap-2">
                   <label htmlFor="maxPrice" className="text-xs font-medium text-muted-foreground">Max (£)</label>
-                  <Input id="maxPrice" name="maxPrice" type="number" min="0" step="0.01" defaultValue={filters.maxPrice ?? ''} />
+                  <Input
+                    id="maxPrice"
+                    name="maxPrice"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    defaultValue={filters.maxPrice ?? ''}
+                    aria-label="Maximum price in GBP"
+                  />
                 </div>
               </div>
 
@@ -205,11 +221,27 @@ export default async function VehiclesPage({ searchParams }: VehiclesPageProps) 
                 <h2 className="text-sm font-semibold uppercase tracking-wider text-foreground">Range (km)</h2>
                 <div className="grid gap-2">
                   <label htmlFor="minRange" className="text-xs font-medium text-muted-foreground">Min</label>
-                  <Input id="minRange" name="minRange" type="number" min="0" step="1" defaultValue={filters.minRange ?? ''} />
+                  <Input
+                    id="minRange"
+                    name="minRange"
+                    type="number"
+                    min="0"
+                    step="1"
+                    defaultValue={filters.minRange ?? ''}
+                    aria-label="Minimum range in kilometers"
+                  />
                 </div>
                 <div className="grid gap-2">
                   <label htmlFor="maxRange" className="text-xs font-medium text-muted-foreground">Max</label>
-                  <Input id="maxRange" name="maxRange" type="number" min="0" step="1" defaultValue={filters.maxRange ?? ''} />
+                  <Input
+                    id="maxRange"
+                    name="maxRange"
+                    type="number"
+                    min="0"
+                    step="1"
+                    defaultValue={filters.maxRange ?? ''}
+                    aria-label="Maximum range in kilometers"
+                  />
                 </div>
               </div>
 
@@ -249,20 +281,24 @@ export default async function VehiclesPage({ searchParams }: VehiclesPageProps) 
             </div>
           </form>
           
-          {/* Divider */}
-          <div className="sparkle-divider">⚡ ⚡ ⚡</div>
-          
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-7">
-            {filteredVehicles.map((vehicle) => (
-              <VehicleCard key={vehicle.id} vehicle={vehicle} hideFeaturedTag={true} />
-            ))}
-          </div>
-          
-          {filteredVehicles.length === 0 && (
-            <div className="text-center py-16 glass-card rounded-xl">
-              <p className="text-muted-foreground">No vehicles matched your search and filters.</p>
+          <section aria-labelledby="vehicles-results-heading" className="space-y-7">
+            <h2 id="vehicles-results-heading" className="sr-only">Vehicle search results</h2>
+
+            {/* Divider */}
+            <div className="sparkle-divider">⚡ ⚡ ⚡</div>
+            
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-7">
+              {filteredVehicles.map((vehicle) => (
+                <VehicleCard key={vehicle.id} vehicle={vehicle} hideFeaturedTag={true} />
+              ))}
             </div>
-          )}
+
+            {filteredVehicles.length === 0 && (
+              <div className="text-center py-16 glass-card rounded-xl">
+                <p className="text-muted-foreground">No vehicles matched your search and filters.</p>
+              </div>
+            )}
+          </section>
         </div>
       </MaxWidthWrapper>
     </div>
