@@ -62,6 +62,18 @@ function trimQuery(value?: string) {
   return value?.trim() ?? '';
 }
 
+function getSearchStatusMessage(query: string, usedAzure: boolean, azureResultCount: number) {
+  if (!query) {
+    return null;
+  }
+
+  if (usedAzure && azureResultCount > 0) {
+    return 'Azure AI Search ranking is active.';
+  }
+
+  return 'Azure AI Search unavailable; using local search fallback.';
+}
+
 export default async function VehiclesPage({ searchParams }: VehiclesPageProps) {
   const filters = await searchParams;
   const query = trimQuery(filters.q);
@@ -147,6 +159,8 @@ export default async function VehiclesPage({ searchParams }: VehiclesPageProps) 
   const searchSummary = query
     ? `Showing ${filteredVehicles.length} result${filteredVehicles.length === 1 ? '' : 's'} for “${query}”.`
     : `Showing all ${filteredVehicles.length} vehicle${filteredVehicles.length === 1 ? '' : 's'}.`;
+  const searchStatusMessage = getSearchStatusMessage(query, usedAzure, azureResultIds.length);
+  const filterPanelClassName = 'rounded-xl border border-border/60 bg-card p-5 shadow-sm';
 
   return (
     <div className="py-14">
@@ -167,7 +181,7 @@ export default async function VehiclesPage({ searchParams }: VehiclesPageProps) 
           </div>
 
           <form className="grid gap-7 lg:grid-cols-[260px_1fr]">
-            <aside className="h-fit space-y-6 rounded-xl border border-border/60 bg-card p-5 shadow-sm">
+            <aside className={`h-fit space-y-6 ${filterPanelClassName}`}>
               <div className="space-y-3">
                 <h2 className="text-sm font-semibold uppercase tracking-wider text-foreground">Type</h2>
                 <div className="space-y-2">
@@ -254,7 +268,7 @@ export default async function VehiclesPage({ searchParams }: VehiclesPageProps) 
             </aside>
 
             <div className="space-y-5">
-              <div className="rounded-xl border border-border/60 bg-card p-5 shadow-sm">
+              <div className={filterPanelClassName}>
                 <div className="flex flex-wrap items-end gap-3">
                   <div className="min-w-[260px] flex-1 space-y-2">
                     <label htmlFor="q" className="text-sm font-medium text-foreground">
@@ -270,12 +284,8 @@ export default async function VehiclesPage({ searchParams }: VehiclesPageProps) 
                   <Button type="submit">Search</Button>
                 </div>
                 <p className="mt-3 text-sm text-muted-foreground">{searchSummary}</p>
-                {query && (
-                  <p className="mt-1 text-xs text-muted-foreground">
-                    {usedAzure && azureResultIds.length > 0
-                      ? 'Azure AI Search ranking is active.'
-                      : 'Azure AI Search unavailable; using local search fallback.'}
-                  </p>
+                {searchStatusMessage && (
+                  <p className="mt-1 text-xs text-muted-foreground">{searchStatusMessage}</p>
                 )}
               </div>
             </div>
