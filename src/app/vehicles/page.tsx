@@ -50,6 +50,7 @@ function parsePositiveNumber(value?: string) {
   return parsed;
 }
 
+// Keeps range inputs valid even when users provide bounds in reverse order.
 function normalizeBounds(min: number | null, max: number | null) {
   if (min !== null && max !== null && min > max) {
     return { min: max, max: min };
@@ -62,6 +63,7 @@ function trimQuery(value?: string) {
   return value?.trim() ?? '';
 }
 
+// Returns the user-facing Azure search status copy for the current query state.
 function getSearchStatusMessage(query: string, usedAzure: boolean, azureResultCount: number) {
   if (!query) {
     return null;
@@ -180,27 +182,38 @@ export default async function VehiclesPage({ searchParams }: VehiclesPageProps) 
             </p>
           </div>
 
-          <form className="grid gap-7 lg:grid-cols-[260px_1fr]">
+          <form aria-label="Vehicle search and filters" className="grid gap-7 lg:grid-cols-[260px_1fr]">
             <aside className={`h-fit space-y-6 ${filterPanelClassName}`}>
               <div className="space-y-3">
-                <h2 className="text-sm font-semibold uppercase tracking-wider text-foreground">Type</h2>
-                <div className="space-y-2">
-                  <label className="flex items-center gap-2 text-sm text-foreground">
-                    <input type="radio" name="category" value="all" defaultChecked={selectedCategory === 'all'} />
+                <fieldset className="space-y-2">
+                  <legend className="text-sm font-semibold uppercase tracking-wider text-foreground">Type</legend>
+                  <label htmlFor="category-all" className="flex items-center gap-2 text-sm text-foreground">
+                    <input
+                      id="category-all"
+                      type="radio"
+                      name="category"
+                      value="all"
+                      defaultChecked={selectedCategory === 'all'}
+                    />
                     All types
                   </label>
-                  {categoryOptions.map((category) => (
-                    <label key={category} className="flex items-center gap-2 text-sm text-foreground">
-                      <input
-                        type="radio"
-                        name="category"
-                        value={category}
-                        defaultChecked={selectedCategory === category}
-                      />
-                      {category}
-                    </label>
-                  ))}
-                </div>
+                  {categoryOptions.map((category) => {
+                    const categoryId = `category-${category.toLowerCase().replace(/\s+/g, '-')}`;
+
+                    return (
+                      <label key={category} htmlFor={categoryId} className="flex items-center gap-2 text-sm text-foreground">
+                        <input
+                          id={categoryId}
+                          type="radio"
+                          name="category"
+                          value={category}
+                          defaultChecked={selectedCategory === category}
+                        />
+                        {category}
+                      </label>
+                    );
+                  })}
+                </fieldset>
               </div>
 
               <div className="space-y-3">
@@ -262,7 +275,7 @@ export default async function VehiclesPage({ searchParams }: VehiclesPageProps) 
               <div className="flex gap-2">
                 <Button type="submit" className="flex-1">Apply filters</Button>
                 <Button type="button" variant="outline" asChild>
-                  <Link href="/vehicles">Clear</Link>
+                  <Link href="/vehicles" aria-label="Clear all filters">Clear</Link>
                 </Button>
               </div>
             </aside>

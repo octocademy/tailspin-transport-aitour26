@@ -56,12 +56,13 @@ export async function searchVehicleIdsWithAzure(query: string): Promise<AzureVeh
       .filter((id): id is string => typeof id === 'string');
 
     return { ids, usedAzure: true };
-  } catch {
+  } catch (error) {
+    console.error('Azure AI Search request failed. Falling back to local search.', error);
     return { ids: [], usedAzure: false };
   }
 }
 
-// Extracts numeric range values from strings such as "451 km" and returns the parsed kilometer value.
+// Extracts numeric range values from strings such as "451 km"; returns null when no finite number is found.
 export function parseVehicleRangeKm(value: string) {
   const match = value.match(/(\d+(?:\.\d+)?)/);
 
