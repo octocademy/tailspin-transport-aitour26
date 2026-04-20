@@ -1,5 +1,5 @@
 import { prisma } from '@/lib/prisma';
-import { parseVehicleRangeKm, searchVehicleIdsWithAzure } from '@/lib/vehicle-search';
+import { parseRangeValueInKm, searchVehicleIdsWithAzure } from '@/lib/vehicle-search';
 import { VehicleCard } from '@/components/vehicles/vehicle-card';
 import { MaxWidthWrapper } from '@/components/shared/max-width-wrapper';
 import { Button } from '@/components/ui/button';
@@ -51,7 +51,7 @@ function parsePositiveNumber(value?: string) {
 }
 
 // Keeps range inputs valid even when users provide bounds in reverse order.
-function normalizeBounds(min: number | null, max: number | null) {
+function ensureMinMaxOrder(min: number | null, max: number | null) {
   if (min !== null && max !== null && min > max) {
     return { min: max, max: min };
   }
@@ -80,8 +80,8 @@ export default async function VehiclesPage({ searchParams }: VehiclesPageProps) 
   const filters = await searchParams;
   const query = trimQuery(filters.q);
   const selectedCategory = filters.category?.trim() || 'all';
-  const priceBounds = normalizeBounds(parsePriceInPence(filters.minPrice), parsePriceInPence(filters.maxPrice));
-  const rangeBounds = normalizeBounds(parsePositiveNumber(filters.minRange), parsePositiveNumber(filters.maxRange));
+  const priceBounds = ensureMinMaxOrder(parsePriceInPence(filters.minPrice), parsePriceInPence(filters.maxPrice));
+  const rangeBounds = ensureMinMaxOrder(parsePositiveNumber(filters.minRange), parsePositiveNumber(filters.maxRange));
 
   const categories = await prisma.vehicle.findMany({
     distinct: ['category'],
@@ -133,7 +133,7 @@ export default async function VehiclesPage({ searchParams }: VehiclesPageProps) 
   });
 
   const filteredVehicles = vehicles.filter((vehicle) => {
-    const rangeKm = parseVehicleRangeKm(vehicle.range);
+    const rangeKm = parseRangeValueInKm(vehicle.range);
     if (rangeKm === null) {
       return rangeBounds.min === null && rangeBounds.max === null;
     }
@@ -182,11 +182,12 @@ export default async function VehiclesPage({ searchParams }: VehiclesPageProps) 
             </p>
           </div>
 
-          <form aria-label="Vehicle search and filters" className="grid gap-7 lg:grid-cols-[260px_1fr]">
+          <h2 id="vehicle-filters-heading" className="sr-only">Vehicle search and filters</h2>
+          <form aria-labelledby="vehicle-filters-heading" className="grid gap-7 lg:grid-cols-[260px_1fr]">
             <aside className={`h-fit space-y-6 ${filterPanelClassName}`}>
               <div className="space-y-3">
                 <fieldset className="space-y-2">
-                  <legend className="text-sm font-semibold uppercase tracking-wider text-foreground">Type</legend>
+                  <legend className="text-sm font-semibold uppercase tracking-wider text-foreground">Vehicle Type</legend>
                   <label htmlFor="category-all" className="flex items-center gap-2 text-sm text-foreground">
                     <input
                       id="category-all"

@@ -63,7 +63,7 @@ export async function searchVehicleIdsWithAzure(query: string): Promise<AzureVeh
 }
 
 // Extracts numeric range values from strings such as "451 km"; returns null when no finite number is found.
-export function parseVehicleRangeKm(value: string) {
+export function parseRangeValueInKm(value: string) {
   const match = value.match(/(\d+(?:\.\d+)?)/);
 
   if (!match) {
