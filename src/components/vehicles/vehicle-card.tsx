@@ -1,5 +1,4 @@
 import Image from 'next/image';
-import { Vehicle } from '@prisma/client';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -9,7 +8,17 @@ import { ShoppingBag, Battery } from 'lucide-react';
 const usdFormatter = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
 
 interface VehicleCardProps {
-  vehicle: Vehicle;
+  vehicle: {
+    id: string;
+    name: string;
+    slug: string;
+    price: number;
+    shortTagline: string;
+    category: string;
+    range: string;
+    imageUrl: string;
+    isFeatured: boolean;
+  };
   hideFeaturedTag?: boolean;
 }
 
