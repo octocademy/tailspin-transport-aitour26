@@ -25,6 +25,7 @@ export function VehiclesSearchContent({ vehicles }: VehiclesSearchContentProps) 
   const [semanticIds, setSemanticIds] = useState<string[]>([]);
   const [semanticError, setSemanticError] = useState('');
   const [isSemanticLoading, setIsSemanticLoading] = useState(false);
+  const [hasAttemptedSemanticSearch, setHasAttemptedSemanticSearch] = useState(false);
 
   const categories = useMemo(
     () =>
@@ -53,6 +54,7 @@ export function VehiclesSearchContent({ vehicles }: VehiclesSearchContentProps) 
       const matchesText = normalizedQuery === '' || searchableText.includes(normalizedQuery);
       const matchesCategory =
         selectedCategorySet.size === 0 || selectedCategorySet.has(vehicle.category);
+      // Prices are stored in minor units (cents/pence), so divide by 100 for user-entered major units.
       const vehiclePriceInDollars = vehicle.price / 100;
       const matchesMinPrice = !hasMinPrice || vehiclePriceInDollars >= parsedMinPrice;
       const matchesMaxPrice = !hasMaxPrice || vehiclePriceInDollars <= parsedMaxPrice;
@@ -84,10 +86,12 @@ export function VehiclesSearchContent({ vehicles }: VehiclesSearchContentProps) 
     setMaxPrice('');
     setSemanticIds([]);
     setSemanticError('');
+    setHasAttemptedSemanticSearch(false);
   }
 
   async function runSemanticSearch() {
     const trimmedQuery = query.trim();
+    setHasAttemptedSemanticSearch(true);
     if (!trimmedQuery) {
       setSemanticIds([]);
       setSemanticError('');
@@ -208,7 +212,9 @@ export function VehiclesSearchContent({ vehicles }: VehiclesSearchContentProps) 
               Showing <span className="font-semibold text-foreground">{filteredVehicles.length}</span> of{' '}
               <span className="font-semibold text-foreground">{vehicles.length}</span> vehicles
             </p>
-            <p className="text-xs text-muted-foreground">Local search always serves as the fallback.</p>
+            {hasAttemptedSemanticSearch && (
+              <p className="text-xs text-muted-foreground">Local search always serves as the fallback.</p>
+            )}
           </div>
 
           {semanticError && (
