@@ -27,7 +27,10 @@ export function VehiclesSearchContent({ vehicles }: VehiclesSearchContentProps) 
   const [isSemanticLoading, setIsSemanticLoading] = useState(false);
 
   const categories = useMemo(
-    () => [...new Set(vehicles.map((vehicle) => vehicle.category))].sort((a, b) => a.localeCompare(b)),
+    () =>
+      [...new Set(vehicles.map((vehicle) => vehicle.category))].sort((a, b) =>
+        a.localeCompare(b, 'en', { sensitivity: 'base' }),
+      ),
     [vehicles],
   );
 
@@ -205,7 +208,7 @@ export function VehiclesSearchContent({ vehicles }: VehiclesSearchContentProps) 
               Showing <span className="font-semibold text-foreground">{filteredVehicles.length}</span> of{' '}
               <span className="font-semibold text-foreground">{vehicles.length}</span> vehicles
             </p>
-            <p className="text-xs text-muted-foreground">Local search is always used as fallback.</p>
+            <p className="text-xs text-muted-foreground">Local search always serves as the fallback.</p>
           </div>
 
           {semanticError && (
