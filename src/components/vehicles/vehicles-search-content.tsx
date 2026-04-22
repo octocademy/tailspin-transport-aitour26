@@ -26,6 +26,8 @@ export function VehiclesSearchContent({ vehicles }: VehiclesSearchContentProps) 
   const [semanticError, setSemanticError] = useState('');
   const [isSemanticLoading, setIsSemanticLoading] = useState(false);
   const [hasAttemptedSemanticSearch, setHasAttemptedSemanticSearch] = useState(false);
+  // Card display currently uses USD, so keep price filter labels aligned with visible pricing.
+  const priceDisplayCurrency = 'USD';
 
   const categories = useMemo(
     () =>
@@ -158,7 +160,7 @@ export function VehiclesSearchContent({ vehicles }: VehiclesSearchContentProps) 
         </div>
 
         <div className="space-y-2">
-          <p className="text-sm font-medium text-foreground">Price (USD)</p>
+          <p className="text-sm font-medium text-foreground">Price ({priceDisplayCurrency})</p>
           <div className="grid grid-cols-2 gap-2">
             <Input
               type="number"
@@ -212,8 +214,11 @@ export function VehiclesSearchContent({ vehicles }: VehiclesSearchContentProps) 
               Showing <span className="font-semibold text-foreground">{filteredVehicles.length}</span> of{' '}
               <span className="font-semibold text-foreground">{vehicles.length}</span> vehicles
             </p>
-            {hasAttemptedSemanticSearch && (
+            {semanticError && (
               <p className="text-xs text-muted-foreground">Local search always serves as the fallback.</p>
+            )}
+            {!semanticError && hasAttemptedSemanticSearch && semanticIds.length > 0 && (
+              <p className="text-xs text-muted-foreground">AI ranking is active, with local filters still applied.</p>
             )}
           </div>
 
