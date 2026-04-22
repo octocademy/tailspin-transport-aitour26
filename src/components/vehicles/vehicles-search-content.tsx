@@ -218,7 +218,9 @@ export function VehiclesSearchContent({ vehicles }: VehiclesSearchContentProps) 
           </div>
 
           {semanticError && (
-            <p className="text-xs text-muted-foreground">{semanticError}</p>
+            <p className="text-xs text-muted-foreground" role="status" aria-live="polite">
+              {semanticError}
+            </p>
           )}
         </div>
 
