@@ -12,12 +12,12 @@ interface VehiclesSearchContentProps {
   categories: string[];
 }
 
-function parseRangeKm(range: string) {
-  const match = range.match(/\d+/);
+function parseRangeKilometers(rangeText: string) {
+  const match = rangeText.match(/\d+/);
   return match ? Number(match[0]) : null;
 }
 
-function parseOptionalNumber(value: string) {
+function parseFilterNumber(value: string) {
   if (value.trim() === "") {
     return null;
   }
@@ -34,44 +34,57 @@ export function VehiclesSearchContent({ vehicles, categories }: VehiclesSearchCo
   const [minRange, setMinRange] = useState("");
   const [maxRange, setMaxRange] = useState("");
 
+  // Pre-compute searchable text and numeric range values once per vehicle list update.
+  const searchableVehicles = useMemo(
+    () =>
+      vehicles.map((vehicle) => ({
+        vehicle,
+        searchableText: `${vehicle.name} ${vehicle.category} ${vehicle.shortTagline}`.toLowerCase(),
+        rangeKm: parseRangeKilometers(vehicle.range),
+      })),
+    [vehicles]
+  );
+
   const filteredVehicles = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
-    const minPriceValue = parseOptionalNumber(minPrice);
-    const maxPriceValue = parseOptionalNumber(maxPrice);
-    const minRangeValue = parseOptionalNumber(minRange);
-    const maxRangeValue = parseOptionalNumber(maxRange);
+    const minPriceValue = parseFilterNumber(minPrice);
+    const maxPriceValue = parseFilterNumber(maxPrice);
+    const minRangeValue = parseFilterNumber(minRange);
+    const maxRangeValue = parseFilterNumber(maxRange);
 
-    return vehicles.filter((vehicle) => {
-      const textMatch =
-        normalizedQuery.length === 0 ||
-        `${vehicle.name} ${vehicle.category} ${vehicle.shortTagline}`.toLowerCase().includes(normalizedQuery);
+    return searchableVehicles
+      .filter(({ vehicle, searchableText, rangeKm }) => {
+        const textMatch =
+          normalizedQuery.length === 0 ||
+          searchableText.includes(normalizedQuery);
 
-      const categoryMatch =
-        selectedCategories.length === 0 || selectedCategories.includes(vehicle.category);
+        const categoryMatch =
+          selectedCategories.length === 0 || selectedCategories.includes(vehicle.category);
 
-      const vehiclePriceDollars = vehicle.price / 100;
-      const minPriceMatch = minPriceValue === null || vehiclePriceDollars >= minPriceValue;
-      const maxPriceMatch = maxPriceValue === null || vehiclePriceDollars <= maxPriceValue;
+        // Convert stored minor units into major currency units for filter comparisons.
+        const vehiclePriceDollars = vehicle.price / 100;
+        const minPriceMatch = minPriceValue === null || vehiclePriceDollars >= minPriceValue;
+        const maxPriceMatch = maxPriceValue === null || vehiclePriceDollars <= maxPriceValue;
 
-      const vehicleRangeKm = parseRangeKm(vehicle.range);
-      const minRangeMatch = minRangeValue === null || (vehicleRangeKm !== null && vehicleRangeKm >= minRangeValue);
-      const maxRangeMatch = maxRangeValue === null || (vehicleRangeKm !== null && vehicleRangeKm <= maxRangeValue);
+        const minRangeMatch = minRangeValue === null || (rangeKm !== null && rangeKm >= minRangeValue);
+        const maxRangeMatch = maxRangeValue === null || (rangeKm !== null && rangeKm <= maxRangeValue);
 
-      return (
-        textMatch &&
-        categoryMatch &&
-        minPriceMatch &&
-        maxPriceMatch &&
-        minRangeMatch &&
-        maxRangeMatch
-      );
-    });
-  }, [query, selectedCategories, minPrice, maxPrice, minRange, maxRange, vehicles]);
+        return (
+          textMatch &&
+          categoryMatch &&
+          minPriceMatch &&
+          maxPriceMatch &&
+          minRangeMatch &&
+          maxRangeMatch
+        );
+      })
+      .map(({ vehicle }) => vehicle);
+  }, [query, selectedCategories, minPrice, maxPrice, minRange, maxRange, searchableVehicles]);
 
   function toggleCategory(category: string) {
     setSelectedCategories((currentCategories) =>
       currentCategories.includes(category)
-        ? currentCategories.filter((currentCategory) => currentCategory !== category)
+        ? currentCategories.filter((cat) => cat !== category)
         : [...currentCategories, category]
     );
   }
@@ -91,7 +104,7 @@ export function VehiclesSearchContent({ vehicles, categories }: VehiclesSearchCo
         <div className="space-y-1.5">
           <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.15em] text-primary">
             <SlidersHorizontal className="h-3.5 w-3.5" />
-            Search &amp; Filters
+            Search & Filters
           </p>
           <p className="text-sm text-muted-foreground">Find vehicles by type, range, and price.</p>
         </div>
