@@ -27,8 +27,8 @@ export function VehiclesSearchContent({ vehicles }: VehiclesSearchContentProps) 
   /* Derived: filtered vehicle list — recomputes only when filters or vehicles change */
   const filteredVehicles = useMemo(() => {
     const query = filters.searchQuery.trim().toLowerCase();
-    const priceMinPence = filters.priceMin !== '' ? parseFloat(filters.priceMin) * 100 : null;
-    const priceMaxPence = filters.priceMax !== '' ? parseFloat(filters.priceMax) * 100 : null;
+    const priceMinPence = filters.priceMin !== '' ? Math.round(parseFloat(filters.priceMin) * 100) : null;
+    const priceMaxPence = filters.priceMax !== '' ? Math.round(parseFloat(filters.priceMax) * 100) : null;
     const rangeMinKm = filters.rangeMin !== '' ? parseFloat(filters.rangeMin) : null;
     const rangeMaxKm = filters.rangeMax !== '' ? parseFloat(filters.rangeMax) : null;
 
@@ -49,9 +49,10 @@ export function VehiclesSearchContent({ vehicles }: VehiclesSearchContentProps) 
         return false;
       }
 
-      /* Price filter — price is stored in pence; inputs are in GBP (£) */
-      if (priceMinPence !== null && vehicle.price < priceMinPence) return false;
-      if (priceMaxPence !== null && vehicle.price > priceMaxPence) return false;
+    /* Price filter — price is stored in pence; inputs are in GBP (£).
+     * Use Math.round to avoid floating-point precision errors when converting. */
+    if (priceMinPence !== null && vehicle.price < priceMinPence) return false;
+    if (priceMaxPence !== null && vehicle.price > priceMaxPence) return false;
 
       /* Range filter — range is a formatted string like "480 km"; parse km value */
       const vehicleRangeKm = parseRangeKm(vehicle.range);

@@ -5,7 +5,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { SlidersHorizontal, RotateCcw } from 'lucide-react';
 
-/** Parses the numeric km value from a range string like "480 km" */
+/**
+ * Parses the numeric km value from a formatted range string like "480 km".
+ * Returns 0 for invalid or empty strings.
+ */
 export function parseRangeKm(rangeStr: string): number {
   return parseInt(rangeStr, 10) || 0;
 }
