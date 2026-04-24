@@ -41,3 +41,10 @@ yarn-error.log*
 next-env.d.ts
 
 /src/generated/prisma
+
+# Temporary screenshots and ad-hoc test scripts at root
+/*.png
+/document-vehicles.js
+/screenshot-only.js
+/simplified-vehicles-test.js
+/test-vehicles.js
