@@ -20,6 +20,13 @@ model Vehicle {
   range        String   // e.g. "480 km"
   imageUrl     String
   isFeatured   Boolean  @default(false)
+  description  String   @default("")
+  topSpeed     String   @default("")
+  acceleration String   @default("")
+  power        String   @default("")
+  drivetrain   String   @default("")
+  seats        Int      @default(5)
+  battery      String   @default("")
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 }

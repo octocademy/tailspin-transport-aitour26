@@ -1,9 +1,10 @@
 import Image from 'next/image';
+import Link from 'next/link';
 import { Vehicle } from '@prisma/client';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ShoppingBag, Battery } from 'lucide-react';
+import { ArrowRight, Battery } from 'lucide-react';
 
 /* Reusable USD currency formatter — created once, shared across all card instances */
 const usdFormatter = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
@@ -59,9 +60,10 @@ export function VehicleCard({ vehicle, hideFeaturedTag = false }: VehicleCardPro
         </div>
       </CardContent>
       <CardFooter className="p-4 pt-0">
-        <Button className="w-full gap-2 font-medium shadow-cloud" variant="default">
-          <ShoppingBag className="h-4 w-4" />
-          Configure &amp; Order
+        <Button asChild className="w-full gap-2 font-medium shadow-cloud" variant="default">
+          <Link href={`/vehicles/${vehicle.slug}`}>
+            More Details <ArrowRight className="h-4 w-4" />
+          </Link>
         </Button>
       </CardFooter>
     </Card>
