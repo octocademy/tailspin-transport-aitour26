@@ -1,5 +1,5 @@
 import { prisma } from '@/lib/prisma';
-import { VehicleCard } from '@/components/vehicles/vehicle-card';
+import { VehiclesSearchContent } from '@/components/vehicles/vehicles-search-content';
 import { MaxWidthWrapper } from '@/components/shared/max-width-wrapper';
 import { Zap } from 'lucide-react';
 
@@ -34,17 +34,7 @@ export default async function VehiclesPage() {
           {/* Divider */}
           <div className="sparkle-divider">⚡ ⚡ ⚡</div>
           
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-7">
-            {vehicles.map((vehicle) => (
-              <VehicleCard key={vehicle.id} vehicle={vehicle} hideFeaturedTag={true} />
-            ))}
-          </div>
-          
-          {vehicles.length === 0 && (
-            <div className="text-center py-16 glass-card rounded-xl">
-              <p className="text-muted-foreground">No vehicles found in the lineup yet.</p>
-            </div>
-          )}
+          <VehiclesSearchContent vehicles={vehicles} />
         </div>
       </MaxWidthWrapper>
     </div>
